@@ -1,0 +1,2133 @@
+<!DOCTYPE html>
+
+<html lang="zh-Hant">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>作業中心 FTE 互動式儀表板</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+
+    :root {
+
+      --bg: #f8fafc;
+
+      --card: #ffffff;
+
+      --text: #0f172a;
+
+      --muted: #64748b;
+
+      --border: #e2e8f0;
+
+      --green: #15803d;
+
+      --red: #b91c1c;
+
+      --amber: #b45309;
+
+      --blue: #2563eb;
+
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+
+      --radius: 18px;
+
+    }
+
+ 
+
+    * { box-sizing: border-box; }
+
+ 
+
+    body {
+
+      margin: 0;
+
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+
+      background: var(--bg);
+
+      color: var(--text);
+
+    }
+
+ 
+
+    .container {
+
+      max-width: 1440px;
+
+      margin: 0 auto;
+
+      padding: 28px;
+
+    }
+
+ 
+
+    .header {
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: flex-end;
+
+      gap: 20px;
+
+      margin-bottom: 22px;
+
+    }
+
+ 
+
+    .eyebrow {
+
+      margin: 0 0 6px;
+
+      color: var(--muted);
+
+      font-size: 14px;
+
+      font-weight: 600;
+
+    }
+
+ 
+
+    h1 {
+
+      margin: 0;
+
+      font-size: 34px;
+
+      letter-spacing: -0.03em;
+
+    }
+
+ 
+
+    .subtitle {
+
+      margin: 10px 0 0;
+
+      color: var(--muted);
+
+      font-size: 15px;
+
+    }
+
+ 
+
+    .filters {
+
+      display: flex;
+
+      flex-wrap: wrap;
+
+      gap: 10px;
+
+      justify-content: flex-end;
+
+    }
+
+ 
+
+    select {
+
+      min-width: 170px;
+
+      padding: 10px 14px;
+
+      border-radius: 12px;
+
+      border: 1px solid var(--border);
+
+      background: #fff;
+
+      color: var(--text);
+
+      font-size: 14px;
+
+      outline: none;
+
+    }
+
+ 
+
+    .grid {
+
+      display: grid;
+
+      gap: 18px;
+
+    }
+
+ 
+
+    .kpi-grid {
+
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+
+      margin-bottom: 18px;
+
+    }
+
+ 
+
+    .two-col {
+
+      grid-template-columns: 2fr 1fr;
+
+      margin-bottom: 18px;
+
+    }
+
+ 
+
+    .half-grid {
+
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+
+      margin-bottom: 18px;
+
+    }
+
+ 
+
+    .card {
+
+      background: var(--card);
+
+      border: 1px solid var(--border);
+
+      border-radius: var(--radius);
+
+      box-shadow: var(--shadow);
+
+      padding: 20px;
+
+    }
+
+ 
+
+    .kpi {
+
+      min-height: 132px;
+
+    }
+
+ 
+
+    .kpi-title {
+
+      color: var(--muted);
+
+      font-size: 14px;
+
+      margin-bottom: 8px;
+
+    }
+
+ 
+
+    .kpi-value {
+
+      font-size: 34px;
+
+      font-weight: 800;
+
+      letter-spacing: -0.04em;
+
+      margin-bottom: 8px;
+
+      display: flex;
+
+      align-items: baseline;
+
+      gap: 14px;
+
+      flex-wrap: wrap;
+
+    }
+
+ 
+
+    .target-badge {
+
+      display: inline-flex;
+
+      align-items: center;
+
+      gap: 6px;
+
+      padding: 5px 10px;
+
+      border-radius: 999px;
+
+      background: #fff7ed;
+
+      border: 1px solid #fed7aa;
+
+      color: #c2410c;
+
+      font-size: 16px;
+
+      font-weight: 800;
+
+      letter-spacing: -0.02em;
+
+      white-space: nowrap;
+
+    }
+
+ 
+
+    .target-badge small {
+
+      font-size: 12px;
+
+      font-weight: 700;
+
+      color: #ea580c;
+
+    }
+
+ 
+
+    .kpi-sub {
+
+      color: var(--muted);
+
+      font-size: 13px;
+
+      line-height: 1.45;
+
+    }
+
+ 
+
+    .card-title {
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      gap: 14px;
+
+      margin-bottom: 12px;
+
+    }
+
+ 
+
+    .card-title h2 {
+
+      margin: 0;
+
+      font-size: 20px;
+
+      letter-spacing: -0.02em;
+
+    }
+
+ 
+
+    .card-title p {
+
+      margin: 5px 0 0;
+
+      color: var(--muted);
+
+      font-size: 13px;
+
+    }
+
+ 
+
+    .chart-box {
+
+      height: 340px;
+
+      position: relative;
+
+    }
+
+ 
+
+    .chart-box.tall {
+
+      height: 420px;
+
+    }
+
+ 
+
+    .table-wrap {
+
+      overflow-x: auto;
+
+      margin-top: 12px;
+
+    }
+
+ 
+
+    table {
+
+      width: 100%;
+
+      border-collapse: separate;
+
+      border-spacing: 0 8px;
+
+      font-size: 14px;
+
+    }
+
+ 
+
+    th {
+
+     color: var(--muted);
+
+      text-align: left;
+
+      font-weight: 700;
+
+      padding: 8px 10px;
+
+      white-space: nowrap;
+
+    }
+
+ 
+
+    td {
+
+      background: #fff;
+
+      border-top: 1px solid var(--border);
+
+      border-bottom: 1px solid var(--border);
+
+      padding: 10px;
+
+      white-space: nowrap;
+
+    }
+
+ 
+
+    td:first-child {
+
+      border-left: 1px solid var(--border);
+
+      border-radius: 12px 0 0 12px;
+
+    }
+
+ 
+
+    td:last-child {
+
+      border-right: 1px solid var(--border);
+
+      border-radius: 0 12px 12px 0;
+
+    }
+
+ 
+
+    .num { text-align: right; }
+
+    .strong { font-weight: 800; }
+
+    .red { color: var(--red); }
+
+    .green { color: var(--green); }
+
+    .amber { color: var(--amber); }
+
+ 
+
+    .insight {
+
+      background: #fffbeb;
+
+      border-color: #fde68a;
+
+      margin-bottom: 18px;
+
+    }
+
+ 
+
+    .insight-grid {
+
+      display: grid;
+
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+
+      gap: 16px;
+
+      color: #334155;
+
+      line-height: 1.65;
+
+      font-size: 14px;
+
+    }
+
+ 
+
+    .footer-note {
+
+      color: var(--muted);
+
+      font-size: 12px;
+
+      line-height: 1.6;
+
+      margin-top: 14px;
+
+    }
+
+ 
+
+    .target-note {
+
+      display: inline-flex;
+
+      align-items: center;
+
+      gap: 8px;
+
+      margin-top: 8px;
+
+      padding: 8px 10px;
+
+      border-radius: 999px;
+
+      background: #fff7ed;
+
+      border: 1px solid #fed7aa;
+
+      color: #c2410c;
+
+      font-size: 12px;
+
+      font-weight: 700;
+
+    }
+
+ 
+
+    .target-note::before {
+
+      content: "";
+
+      width: 28px;
+
+      height: 10px;
+
+      border-radius: 999px;
+
+      background: rgba(249, 115, 22, 0.16);
+
+      border-top: 2px dashed #f97316;
+
+      border-bottom: 2px dashed #f97316;
+
+    }
+
+ 
+
+    @media (max-width: 1100px) {
+
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+      .two-col, .half-grid { grid-template-columns: 1fr; }
+
+      .header { align-items: flex-start; flex-direction: column; }
+
+      .filters { justify-content: flex-start; }
+
+    }
+
+ 
+
+    @media (max-width: 640px) {
+
+      .container { padding: 16px; }
+
+      h1 { font-size: 26px; }
+
+      .kpi-grid { grid-template-columns: 1fr; }
+
+      .insight-grid { grid-template-columns: 1fr; }
+
+      .chart-box { height: 300px; }
+
+      select { width: 100%; }
+
+      .filters { width: 100%; }
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div class="container">
+
+    <header class="header">
+
+      <div>
+
+        <p class="eyebrow">2025/04–2026/04｜作業中心 FTE 與人力缺口</p>
+
+        <h1>業務作業量互動式儀表板</h1>
+
+        <p class="subtitle">聚焦總體 FTE、實際人力、科別缺口、加班與近兩月作業量變動。</p>
+
+      </div>
+
+      <div class="filters">
+
+        <select id="monthSelect"></select>
+
+        <select id="categorySelect"></select>
+
+        <select id="deptSelect"></select>
+
+      </div>
+
+    </header>
+
+ 
+
+    <section class="grid kpi-grid">
+
+      <div class="card kpi">
+
+        <div class="kpi-title" id="fteTitle">交易量 FTE</div>
+
+        <div class="kpi-value"><span id="kpiFte">-</span><span class="target-badge"><small>目標FTE</small><span id="targetFteKpi">382</span></span></div>
+
+        <div class="kpi-sub" id="kpiFteSub">-</div>
+
+      </div>
+
+      <div class="card kpi">
+
+        <div class="kpi-title" id="headcountTitle">實際人數</div>
+
+        <div class="kpi-value"><span id="kpiHeadcount">-</span><span class="target-badge"><small>目標人數</small><span id="targetHeadcountKpi">273</span></span></div>
+
+        <div class="kpi-sub">報表期間約 272–283 人</div>
+
+      </div>
+
+      <div class="card kpi">
+
+        <div class="kpi-title" id="gapTitle">人力缺口</div>
+
+        <div class="kpi-value red" id="kpiGap">-</div>
+
+        <div class="kpi-sub" id="kpiGapSub">-</div>
+
+      </div>
+
+      <div class="card kpi">
+
+        <div class="kpi-title">主要負荷來源</div>
+
+        <div class="kpi-value">開戶＋臺幣</div>
+
+        <div class="kpi-sub" id="kpiMainWorkload">-</div>
+
+      </div>
+
+    </section>
+
+ 
+
+    <section class="grid two-col">
+
+      <div class="card">
+
+        <div class="card-title">
+
+          <div>
+
+            <h2>整體 FTE、實際人數趨勢</h2>
+
+            <p>目標實際人數 273 × 1.25～1.45 = 341～396 FTE；圖中已移除人力缺口線。</p>
+
+          </div>
+
+        </div>
+
+        <div class="target-note">FTE 容忍區間：341～396</div>
+
+        <div class="chart-box"><canvas id="overallChart"></canvas></div>
+
+      </div>
+
+ 
+
+      <div class="card">
+
+        <div class="card-title">
+
+          <div>
+
+            <h2 id="categoryTitle">作業大類結構</h2>
+
+            <p>顯示 PDF 首頁揭露之主要作業大類 FTE。</p>
+
+          </div>
+
+        </div>
+
+        <div class="chart-box"><canvas id="categoryChart"></canvas></div>
+
+      </div>
+
+    </section>
+
+ 
+
+    <section class="grid half-grid">
+
+      <div class="card">
+
+        <div class="card-title">
+
+          <div>
+
+            <h2>科別缺口與加班壓力</h2>
+
+            <p>以 2026/04 資料呈現，缺口與加班同時高者為優先關注。</p>
+
+          </div>
+
+        </div>
+
+        <div class="chart-box"><canvas id="deptPressureChart"></canvas></div>
+
+      </div>
+
+ 
+
+      <div class="card">
+
+        <div class="card-title">
+
+          <div>
+
+            <h2>科別 FTE 趨勢</h2>
+
+            <p>可從右上方選擇科別，檢視 13 個月 FTE 走勢。</p>
+
+          </div>
+
+        </div>
+
+        <div class="chart-box"><canvas id="deptTrendChart"></canvas></div>
+
+      </div>
+
+    </section>
+
+ 
+
+    <section class="card">
+
+      <div class="card-title">
+
+        <div>
+
+          <h2>近兩個月作業量 FTE Top 10</h2>
+
+          <p>比較 2026/03 與 2026/04，依 2026/04 FTE 排序；可用右上方作業大類篩選。</p>
+
+        </div>
+
+      </div>
+
+      <div class="chart-box tall"><canvas id="growthChart"></canvas></div>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>作業大類</th>
+
+              <th>作業小類</th>
+
+              <th class="num">2026/03 FTE</th>
+
+              <th class="num">2026/04 FTE</th>
+
+              <th class="num">FTE 差異</th>
+
+              <th class="num">2026/04 作業量</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody id="workloadTable"></tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+ 
+
+    <section class="card insight">
+
+      <div class="card-title">
+
+        <div>
+
+          <h2>管理判讀</h2>
+
+          <p>供主管簡報或資源配置討論使用。</p>
+
+        </div>
+
+      </div>
+
+      <div class="insight-grid">
+
+        <div><strong>1. FTE容忍區間：</strong>以目標實際人數 273 推估，合理 FTE 約 341～396；2026/01～2026/02 高於上限，2026/03～2026/04 仍接近或高於上限，需持續關注負荷。</div>
+
+        <div><strong>2. 作業集中：</strong>2026/04 開戶定審與臺幣帳務合計約 214 FTE，仍為主要負荷來源。</div>
+
+        <div><strong>3. 優先單位：</strong>外匯作業中心科兼具高 FTE、最大缺口與最高加班分鐘，應優先檢視分流、流程與人力配置。</div>
+
+      </div>
+
+      <p class="footer-note">資料來源：使用者提供之「業務作業量儀表板 2025年4月～2026年4月」PDF。部分未完整揭露之作業類別以 PDF 可辨識數字建置。</p>
+
+    </section>
+
+  </div>
+
+ 
+
+  <script>
+
+    const months = ["2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04"];
+
+ 
+
+    const centerMonthly = [
+
+    {
+
+        "month": "2025-04",
+
+        "fte": 367,
+
+        "headcount": 272,
+
+        "gap": -95,
+
+        "open": 96,
+
+        "twd": 95,
+
+        "manual": 74,
+
+        "fx": null
+
+    },
+
+    {
+
+        "month": "2025-05",
+
+        "fte": 374,
+
+        "headcount": 274,
+
+        "gap": -100,
+
+        "open": 104,
+
+        "twd": 92,
+
+        "manual": 70,
+
+        "fx": null
+
+    },
+
+    {
+
+        "month": "2025-06",
+
+        "fte": 351,
+
+        "headcount": 272,
+
+        "gap": -79,
+
+        "open": 93,
+
+        "twd": 87,
+
+        "manual": 65,
+
+        "fx": null
+
+    },
+
+    {
+
+        "month": "2025-07",
+
+        "fte": 351,
+
+        "headcount": 280,
+
+        "gap": -71,
+
+        "open": 94,
+
+        "twd": 89,
+
+        "manual": 62,
+
+        "fx": null
+
+    },
+
+    {
+
+        "month": "2025-08",
+
+        "fte": 362,
+
+        "headcount": 281,
+
+        "gap": -81,
+
+        "open": 92,
+
+        "twd": 96,
+
+        "manual": 68,
+
+        "fx": null
+
+    },
+
+    {
+
+        "month": "2025-09",
+
+        "fte": 362,
+
+        "headcount": 279,
+
+        "gap": -83,
+
+        "open": 87,
+
+        "twd": 97,
+
+        "manual": 65,
+
+        "fx": 48
+
+    },
+
+    {
+
+        "month": "2025-10",
+
+        "fte": 375,
+
+        "headcount": 282,
+
+        "gap": -93,
+
+        "open": 90,
+
+        "twd": 98,
+
+        "manual": 83,
+
+        "fx": 51
+
+    },
+
+    {
+
+        "month": "2025-11",
+
+        "fte": 385,
+
+        "headcount": 283,
+
+        "gap": -102,
+
+        "open": 110,
+
+        "twd": 95,
+
+        "manual": 69,
+
+        "fx": 51
+
+    },
+
+    {
+
+        "month": "2025-12",
+
+        "fte": 378,
+
+        "headcount": 282,
+
+        "gap": -96,
+
+        "open": 104,
+
+        "twd": 100,
+
+        "manual": 69,
+
+        "fx": 50
+
+    },
+
+    {
+
+        "month": "2026-01",
+
+        "fte": 420,
+
+        "headcount": 282,
+
+        "gap": -138,
+
+        "open": 105,
+
+        "twd": 127,
+
+        "manual": 72,
+
+        "fx": 51
+
+    },
+
+    {
+
+        "month": "2026-02",
+
+        "fte": 437,
+
+        "headcount": 282,
+
+        "gap": -155,
+
+        "open": 114,
+
+        "twd": 108,
+
+        "manual": 86,
+
+        "fx": 57
+
+    },
+
+    {
+
+        "month": "2026-03",
+
+        "fte": 399,
+
+        "headcount": 282,
+
+        "gap": -117,
+
+        "open": 107,
+
+        "twd": 104,
+
+        "manual": 71,
+
+        "fx": 49
+
+    },
+
+    {
+
+        "month": "2026-04",
+
+        "fte": 407,
+
+        "headcount": 282,
+
+        "gap": -125,
+
+        "open": 107,
+
+        "twd": 107,
+
+        "manual": 78,
+
+        "fx": 51
+
+    }
+
+];
+
+ 
+
+    const deptLatest = [
+
+    {
+
+        "dept": "北區存匯作業中心科",
+
+        "fte": 65,
+
+        "headcount": 53,
+
+        "gap": -12,
+
+        "overtime": 14,
+
+        "productivity": 1.37
+
+    },
+
+    {
+
+        "dept": "中區存匯作業中心一科",
+
+        "fte": 71,
+
+        "headcount": 47,
+
+        "gap": -24,
+
+        "overtime": 61,
+
+        "productivity": 1.67
+
+    },
+
+    {
+
+        "dept": "中區存匯作業中心二科",
+
+        "fte": 62,
+
+        "headcount": 42,
+
+        "gap": -20,
+
+        "overtime": 44,
+
+        "productivity": 1.41
+
+    },
+
+    {
+
+        "dept": "南區存匯作業中心科",
+
+        "fte": 79,
+
+        "headcount": 59,
+
+        "gap": -20,
+
+        "overtime": 15,
+
+        "productivity": 1.39
+
+    },
+
+    {
+
+        "dept": "外匯作業中心科",
+
+        "fte": 82,
+
+        "headcount": 46,
+
+        "gap": -36,
+
+        "overtime": 46,
+
+        "productivity": 1.69
+
+    },
+
+    {
+
+        "dept": "會計暨清算作業中心科",
+
+        "fte": 47,
+
+        "headcount": 33,
+
+        "gap": -14,
+
+        "overtime": 17,
+
+        "productivity": 1.49
+
+    }
+
+];
+
+ 
+
+    const deptMonthlyTotals = {
+
+    "北區存匯作業中心科": [
+
+        57.8,
+
+        65.9,
+
+        61.4,
+
+        61.4,
+
+        61.7,
+
+        60.7,
+
+        60.9,
+
+        64.5,
+
+        66.4,
+
+        83.6,
+
+        70.9,
+
+        65.1,
+
+        65.5
+
+    ],
+
+    "會計暨清算作業中心科": [
+
+        66.1,
+
+        43.8,
+
+        41.3,
+
+        40.9,
+
+        42.5,
+
+        44.3,
+
+        46.1,
+
+        49.3,
+
+        45.5,
+
+        48.5,
+
+        57.8,
+
+        46.8,
+
+        47.2
+
+    ],
+
+    "中區存匯作業中心一科": [
+
+        65.3,
+
+        64.1,
+
+        58.6,
+
+        58.6,
+
+        61.8,
+
+        65.0,
+
+        65.3,
+
+        64.9,
+
+        61.4,
+
+        65.8,
+
+        69.5,
+
+        69.2,
+
+        71.4
+
+    ],
+
+    "中區存匯作業中心二科": [
+
+        56.1,
+
+        60.1,
+
+        56.1,
+
+        54.4,
+
+        59.4,
+
+        51.8,
+
+        55.7,
+
+        58.4,
+
+        55.2,
+
+        59.0,
+
+        64.8,
+
+        58.1,
+
+        62.0
+
+    ],
+
+    "南區存匯作業中心科": [
+
+        69.8,
+
+        72.0,
+
+        69.7,
+
+        68.0,
+
+        68.6,
+
+        74.2,
+
+        74.2,
+
+        71.5,
+
+        75.9,
+
+        82.0,
+
+        84.9,
+
+        77.8,
+
+        79.0
+
+    ],
+
+    "外匯作業中心科": [
+
+        51.9,
+
+        67.9,
+
+        63.5,
+
+        67.8,
+
+        67.7,
+
+        66.1,
+
+        72.7,
+
+        76.3,
+
+        73.4,
+
+        80.8,
+
+        88.8,
+
+        82.4,
+
+        81.9
+
+    ]
+
+};
+
+ 
+
+    const workload = [
+
+    {
+
+        "category": "票據作業",
+
+        "item": "票據託收",
+
+        "volFeb": 721784,
+
+        "volMar": 831057,
+
+        "growth": 15,
+
+        "fteFeb": 9.33,
+
+        "fteMar": 9.39,
+
+        "avg": 716153
+
+    },
+
+    {
+
+        "category": "票據作業",
+
+        "item": "票據提回",
+
+        "volFeb": 332454,
+
+        "volMar": 258823,
+
+        "growth": -22,
+
+        "fteFeb": 12.27,
+
+        "fteMar": 10.62,
+
+        "avg": 266941
+
+    },
+
+    {
+
+        "category": "臺幣帳務",
+
+        "item": "ACH",
+
+        "volFeb": 166802,
+
+        "volMar": 109304,
+
+        "growth": -34,
+
+        "fteFeb": 0.64,
+
+        "fteMar": 0.64,
+
+        "avg": 73104
+
+    },
+
+    {
+
+        "category": "臺幣帳務",
+
+        "item": "證券",
+
+        "volFeb": 105850,
+
+        "volMar": 95305,
+
+        "growth": -10,
+
+        "fteFeb": 4.51,
+
+        "fteMar": 4.23,
+
+        "avg": 86717
+
+    },
+
+    {
+
+        "category": "臺幣帳務",
+
+        "item": "台幣帳務",
+
+        "volFeb": 88180,
+
+        "volMar": 82356,
+
+        "growth": -7,
+
+        "fteFeb": 30.47,
+
+        "fteMar": 32.08,
+
+        "avg": 80422
+
+    },
+
+    {
+
+        "category": "臺幣帳務",
+
+        "item": "台幣匯款集中",
+
+        "volFeb": 29954,
+
+        "volMar": 28877,
+
+        "growth": -4,
+
+        "fteFeb": 10.96,
+
+        "fteMar": 11.02,
+
+        "avg": 32222
+
+    },
+
+    {
+
+        "category": "臺幣帳務",
+
+        "item": "公文處理",
+
+        "volFeb": 19350,
+
+        "volMar": 20886,
+
+        "growth": 8,
+
+        "fteFeb": 24.95,
+
+        "fteMar": 27.51,
+
+        "avg": 17130
+
+    },
+
+    {
+
+        "category": "臺幣帳務",
+
+        "item": "異常帳戶",
+
+        "volFeb": 8478,
+
+        "volMar": 8326,
+
+        "growth": -2,
+
+        "fteFeb": 24.38,
+
+        "fteMar": 24.33,
+
+        "avg": 6701
+
+    },
+
+    {
+
+        "category": "臺幣帳務",
+
+        "item": "現金交易(委保全)",
+
+        "volFeb": 5346,
+
+        "volMar": 4688,
+
+        "growth": -12,
+
+        "fteFeb": 6.59,
+
+        "fteMar": 6.45,
+
+        "avg": 5003
+
+    },
+
+    {
+
+        "category": "臺幣帳務",
+
+        "item": "會計師函證",
+
+        "volFeb": 3752,
+
+        "volMar": 2169,
+
+        "growth": -42,
+
+        "fteFeb": 1.71,
+
+        "fteMar": 1.11,
+
+        "avg": 1704
+
+    },
+
+    {
+
+        "category": "臺幣帳務",
+
+        "item": "清算",
+
+        "volFeb": 65,
+
+        "volMar": 74,
+
+        "growth": 14,
+
+        "fteFeb": 0.1,
+
+        "fteMar": 0.12,
+
+        "avg": 68
+
+    },
+
+    {
+
+        "category": "外幣帳務",
+
+        "item": "匯兌",
+
+        "volFeb": 88002,
+
+        "volMar": 81342,
+
+        "growth": -8,
+
+        "fteFeb": 44.11,
+
+        "fteMar": 45.14,
+
+        "avg": 80061
+
+    },
+
+    {
+
+        "category": "外幣帳務",
+
+        "item": "外匯會計",
+
+        "volFeb": 64760,
+
+        "volMar": 70373,
+
+        "growth": 9,
+
+        "fteFeb": 3.81,
+
+        "fteMar": 4.38,
+
+       "avg": 51477
+
+    },
+
+    {
+
+        "category": "外幣帳務",
+
+        "item": "電訊",
+
+        "volFeb": 16213,
+
+        "volMar": 14566,
+
+        "growth": -10,
+
+        "fteFeb": 0.94,
+
+        "fteMar": 0.93,
+
+        "avg": 13760
+
+    },
+
+    {
+
+        "category": "外幣帳務",
+
+        "item": "海外委回",
+
+        "volFeb": 578,
+
+        "volMar": 474,
+
+        "growth": -18,
+
+        "fteFeb": 0.49,
+
+        "fteMar": 0.44,
+
+        "avg": 463
+
+    },
+
+    {
+
+        "category": "開戶定審",
+
+        "item": "數位存款審查",
+
+        "volFeb": 35968,
+
+        "volMar": 28892,
+
+        "growth": -20,
+
+        "fteFeb": 23.61,
+
+        "fteMar": 21.36,
+
+        "avg": 22050
+
+    },
+
+    {
+
+        "category": "開戶定審",
+
+        "item": "DBU異動",
+
+        "volFeb": 28376,
+
+        "volMar": 26222,
+
+        "growth": -8,
+
+        "fteFeb": 29.81,
+
+        "fteMar": 29.75,
+
+        "avg": 25288
+
+    },
+
+    {
+
+        "category": "開戶定審",
+
+        "item": "定審",
+
+        "volFeb": 24734,
+
+        "volMar": 22073,
+
+        "growth": -11,
+
+        "fteFeb": 22.77,
+
+        "fteMar": 22.56,
+
+        "avg": 21658
+
+    },
+
+    {
+
+        "category": "開戶定審",
+
+        "item": "WLF(即時)",
+
+        "volFeb": 20210,
+
+        "volMar": 17767,
+
+        "growth": -12,
+
+        "fteFeb": 12.86,
+
+        "fteMar": 12.4,
+
+        "avg": 14821
+
+    },
+
+    {
+
+        "category": "開戶定審",
+
+        "item": "法人開戶",
+
+        "volFeb": 1138,
+
+        "volMar": 1237,
+
+        "growth": 9,
+
+        "fteFeb": 7.87,
+
+        "fteMar": 9.34,
+
+        "avg": 1202
+
+    },
+
+    {
+
+        "category": "開戶定審",
+
+        "item": "個人開戶(含apod)",
+
+        "volFeb": 1201,
+
+        "volMar": 1207,
+
+        "growth": 0,
+
+        "fteFeb": 4.85,
+
+        "fteMar": 5.36,
+
+        "avg": 884
+
+    },
+
+    {
+
+        "category": "開戶定審",
+
+        "item": "繼承",
+
+        "volFeb": 1000,
+
+        "volMar": 1064,
+
+        "growth": 6,
+
+        "fteFeb": 5.24,
+
+        "fteMar": 6.15,
+
+        "avg": 1002
+
+    },
+
+    {
+
+        "category": "開戶定審",
+
+        "item": "ID改號",
+
+        "volFeb": 2,
+
+        "volMar": 3,
+
+        "growth": 50,
+
+        "fteFeb": 0.03,
+
+        "fteMar": 0.02,
+
+        "avg": 3
+
+    },
+
+    {
+
+        "category": "會計作業",
+
+        "item": "費用",
+
+        "volFeb": 41860,
+
+        "volMar": 36442,
+
+        "growth": -13,
+
+        "fteFeb": 5.85,
+
+        "fteMar": 5.7,
+
+        "avg": 41079
+
+    },
+
+    {
+
+        "category": "會計作業",
+
+        "item": "稅務",
+
+        "volFeb": 1091,
+
+        "volMar": 890,
+
+        "growth": -18,
+
+        "fteFeb": 1.88,
+
+        "fteMar": 1.5,
+
+        "avg": 953
+
+    },
+
+    {
+
+        "category": "會計作業",
+
+        "item": "ATM帳務",
+
+        "volFeb": 233,
+
+        "volMar": 188,
+
+        "growth": -19,
+
+        "fteFeb": 0.05,
+
+        "fteMar": 0.04,
+
+        "avg": 234
+
+    }
+
+];
+
+ 
+
+    let overallChart;
+
+    let categoryChart;
+
+    let deptPressureChart;
+
+    let deptTrendChart;
+
+    let growthChart;
+
+ 
+
+    const fmt = value => {
+
+      if (value === null || value === undefined) return '-';
+
+      return Number(value).toLocaleString('zh-TW');
+
+    };
+
+ 
+
+    const chartColors = {
+
+      blue: '#2563eb',
+
+      green: '#16a34a',
+
+      red: '#dc2626',
+
+      amber: '#f59e0b',
+
+      cyan: '#0891b2',
+
+      purple: '#7c3aed',
+
+      slate: '#64748b'
+
+    };
+
+ 
+
+    const targetActualHeadcount = 273;
+
+    const targetFteLower = Math.round(targetActualHeadcount * 1.25); // 341
+
+    const targetFteToleranceUpper = Math.round(targetActualHeadcount * 1.45); // 396
+
+    const targetFteKpiValue = 382; // 目標FTE
+
+ 
+
+    const fteToleranceBandPlugin = {
+
+      id: 'fteToleranceBand',
+
+      beforeDatasetsDraw(chart) {
+
+        if (chart.canvas.id !== 'overallChart') return;
+
+        const {ctx, chartArea, scales} = chart;
+
+        const y = scales.y;
+
+        if (!chartArea || !y) return;
+
+        const upper = y.getPixelForValue(targetFteToleranceUpper);
+
+        const lower = y.getPixelForValue(targetFteLower);
+
+        ctx.save();
+
+        ctx.fillStyle = 'rgba(249, 115, 22, 0.10)';
+
+        ctx.fillRect(chartArea.left, upper, chartArea.right - chartArea.left, lower - upper);
+
+        ctx.setLineDash([6, 5]);
+
+        ctx.strokeStyle = 'rgba(249, 115, 22, 0.85)';
+
+        ctx.lineWidth = 1.5;
+
+        [upper, lower].forEach(py => {
+
+          ctx.beginPath();
+
+          ctx.moveTo(chartArea.left, py);
+
+          ctx.lineTo(chartArea.right, py);
+
+          ctx.stroke();
+
+        });
+
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#c2410c';
+
+        ctx.font = '600 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+
+        ctx.fillText(`FTE容忍區間 ${targetFteLower}～${targetFteToleranceUpper}`, chartArea.left + 8, upper + 18);
+
+        ctx.restore();
+
+      }
+
+    };
+
+ 
+
+    Chart.register(fteToleranceBandPlugin);
+
+ 
+
+    function initFilters() {
+
+      const monthSelect = document.getElementById('monthSelect');
+
+      [...months].reverse().forEach(month => {
+
+        const option = document.createElement('option');
+
+        option.value = month;
+
+        option.textContent = month;
+
+        monthSelect.appendChild(option);
+
+      });
+
+      monthSelect.value = '2026-04';
+
+ 
+
+      const categorySelect = document.getElementById('categorySelect');
+
+      const categories = ['全部', ...new Set(workload.map(d => d.category))];
+
+      categories.forEach(category => {
+
+        const option = document.createElement('option');
+
+        option.value = category;
+
+        option.textContent = category;
+
+        categorySelect.appendChild(option);
+
+      });
+
+ 
+
+      const deptSelect = document.getElementById('deptSelect');
+
+      Object.keys(deptMonthlyTotals).forEach(dept => {
+
+        const option = document.createElement('option');
+
+        option.value = dept;
+
+        option.textContent = dept;
+
+        deptSelect.appendChild(option);
+
+      });
+
+      deptSelect.value = '外匯作業中心科';
+
+ 
+
+      monthSelect.addEventListener('change', updateAll);
+
+      categorySelect.addEventListener('change', updateAll);
+
+      deptSelect.addEventListener('change', updateAll);
+
+    }
+
+ 
+
+    function updateKpis() {
+
+      const selectedMonth = document.getElementById('monthSelect').value;
+
+      const current = centerMonthly.find(d => d.month === selectedMonth);
+
+      const peak = centerMonthly.reduce((a, b) => b.fte > a.fte ? b : a, centerMonthly[0]);
+
+      const worstGap = centerMonthly.reduce((a, b) => b.gap < a.gap ? b : a, centerMonthly[0]);
+
+ 
+
+      document.getElementById('fteTitle').textContent = `${selectedMonth} 交易量 FTE`;
+
+      document.getElementById('headcountTitle').textContent = `${selectedMonth} 實際人數`;
+
+      document.getElementById('gapTitle').textContent = `${selectedMonth} 人力缺口`;
+
+      document.getElementById('kpiFte').textContent = fmt(current.fte);
+
+      document.getElementById('kpiHeadcount').textContent = fmt(current.headcount);
+
+      document.getElementById('targetFteKpi').textContent = targetFteKpiValue;
+
+      document.getElementById('targetHeadcountKpi').textContent = targetActualHeadcount;
+
+      document.getElementById('kpiGap').textContent = fmt(current.gap);
+
+      document.getElementById('kpiFteSub').textContent = `高峰：${peak.month} / ${peak.fte} FTE
